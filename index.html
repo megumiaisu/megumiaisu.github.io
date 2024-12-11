@@ -154,16 +154,29 @@
 
         tree = new google.visualization.TreeMap(document.getElementById('chart_div'));
 
-        tree.draw(data, {
+        var options = {
           minColor: '#67b7dc',
           midColor: '#8067dc',
           maxColor: '#dc67ce',
           headerHeight: 0,
           fontColor: 'white',
           headerColor: 'black',
-          showScale: false
-        });
+          showScale: false,
+          generateTooltip: showFullTooltip
+        }
+        
+        tree.draw(data, options);
 
+        function showFullTooltip(row, size, value) {
+            return '<div style="background:#fd9; padding:10px; border-style:solid">' +
+                   '<span style="font-family:Courier"><b>' + data.getValue(row, 0) +
+                   '</b>, ' + data.getValue(row, 1) + ', ' + data.getValue(row, 2) +
+                   ', ' + data.getValue(row, 3) + '</span><br>' +
+                   'Datatable row: ' + row + '<br>' +
+        	   data.getColumnLabel(2) +
+                   ' (total value of this cell and its children): ' + size + '<br>' +
+        	   data.getColumnLabel(3) + ': ' + value + ' </div>';
+          }
       }
     </script>
   </head>
