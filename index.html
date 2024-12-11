@@ -168,14 +168,8 @@
         tree.draw(data, options);
 
         function showFullTooltip(row, size, value) {
-            return '<div style="background:#fd9; padding:10px; border-style:solid">' +
-                   '<span style="font-family:Courier"><b>' + data.getValue(row, 0) +
-                   '</b>, ' + data.getValue(row, 1) + ', ' + data.getValue(row, 2) +
-                   ', ' + data.getValue(row, 3) + '</span><br>' +
-                   'Datatable row: ' + row + '<br>' +
-        	   data.getColumnLabel(2) +
-                   ' (total value of this cell and its children): ' + size + '<br>' +
-        	   data.getColumnLabel(3) + ': ' + value + ' </div>';
+            return '<div style="background:#fd9; padding:10px; border-style:solid; font-family:Helvetica, sans-serif;">' +
+                   '<span>' + size + ' projects used ' + data.getValue(row, 0) + '.</span></div>';
           }
       }
     </script>
