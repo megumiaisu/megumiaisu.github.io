@@ -28,21 +28,7 @@
 
 	var networkSeries = chart.series.push(new am4plugins_forceDirected.ForceDirectedSeries())
 
-	networkSeries.data = [{
-	  name: 'Development', children: [{name: 'Floral', children: [{ name: 'Chamomile', value: 1}, 
-	    {name: 'Rose', value: 1},
-		{name: 'Jasmine', value: 1}]},
-		{
-		name: 'Floral',
-		children: [{
-		  name: 'Chamomile', value: 1
-		}, {
-		  name: 'Rose', value: 1
-		}, {
-		  name: 'Jasmine', value: 1
-		}]
-	  }]
-	},
+	networkSeries.data = [
 	{name: 'Development', children: [	{name: 'Application Development and Support', children: [	{name: 'API Development', value: 1}, 
 			{name: 'Application Development', value: 5}, 
 			{name: 'Application Migration', value: 2}, 
