@@ -1,53 +1,63 @@
-<!DOCTYPE html>
-<html lang="en">
-
 <head>
-	<meta charset="UTF-8">
-	<meta name="viewport"
-		content="width=device-width, initial-scale=1.0">
-	<script src=
-"https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js">
-	</script>
-	<script src=
-"https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.1.2/chart.umd.js">
-	</script>
-	<title>Radar Chart Example</title>
+	<!-- Load plotly.js into the DOM -->
+	<script src='https://cdn.plot.ly/plotly-2.35.2.min.js'></script>
 </head>
 
-<body>
-	<div style="background-color:#444444;font-color:red;">
-		<div>
-			<canvas id="radarChart"
-					width="100%" height="400px">
-			</canvas>
-		</div>
-	</div>
-	<script>
-		let ctx = 
-			document.getElementById('radarChart').getContext('2d');
-		let myRadarChart = new Chart(ctx, {
-			type: 'radar',
-			data: {
-				labels:
-					['Natural Resources', 'Transportation', 'Cultural Heritage',
-					'Oil and Gas', 'Fisheries'],
-				datasets: [{
-					label: 'GeeksforGeeks Skills',
-					data: [90, 85, 80, 75, 95],
-					backgroundColor: 'rgba(75, 192, 192, 0.2)',
-					borderColor: 'rgba(75, 192, 0, 1)',
-					borderWidth: 2,
-				}]
-			},
-			options: {
-				scale: {
-					pointLabels: {
-						fontSize: 14,
-					}
-				}
-			}
-		});
-	</script>
-</body>
+<body style="background-color:#444444; height:400px;margin:0 auto;">
+	<div id='myDiv' style="background-color:#444444;width: 100%;"><!-- Plotly chart will be drawn inside this DIV --></div>
+  <script>
+    data = [{
+  type: 'scatterpolar',
+  r: [10, 4, 2, 2, 18, 7, 3, 24, 3, 10],
+  theta: ['Aviation', 'Cultural Herirage', 'Defense', 'Env. Remediation', 'Fisheries', 'Natural Resources', 'NEPA', 'Oceanography', 'Oil & Gas', 'Aviation'],
+  fill: 'toself',
+  line: {
+    color: '#4bc000'
+  },
+  hoverlabel: {
+    bgcolor: '#E3E3E3',
+    font: {
+      size: 13
+    }
+  },
+  hovertemplate: 'Project Count for %{theta}: %{r}<extra></extra>'
+}]
 
-</html>
+layout = {
+  polar: {
+    gridshape: "circular",
+    radialaxis: {
+      angle: 90,
+      visible: true,
+      range: [0, 26],
+      color: '#fff',
+      tickfont: {
+        size: 8
+      },
+      tickangle: 90,
+      layer: "below traces"
+    },
+    bgcolor: '#444444',
+    angularaxis: {
+      direction: "clockwise",
+      griddash: "solid",
+      gridcolor: "#8F8F8F"
+    }
+  },
+  font: {
+    size: 11,
+    family: 'Arial',
+    color: '#ffffff'
+  },
+  paper_bgcolor: '#444444',
+  plot_bgcolor: '#444444',
+  showlegend: false,
+  xaxis: {
+    title: '#000'
+  }
+}
+
+Plotly.newPlot("myDiv", data, layout)
+
+  </script>
+</body>
