@@ -1,1 +1,139 @@
 
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>pH Gauge — site: archery (Google Charts)</title>
+  <style>
+    body { font-family: system-ui, Arial, sans-serif; margin: 24px; }
+    .info { margin-top: 10px; font-size: 14px; }
+    .badge { display:inline-block; margin-top:6px; padding:4px 8px; border-radius:12px; font-size:12px; color:#fff; }
+    .badge.green { background:#2ecc71; }
+    .badge.red { background:#e74c3c; }
+    .badge.gray { background:#888; }
+    .error { color:#b00020; }
+  </style>
+
+  <!-- ArcGIS JS API -->
+  <link rel="stylesheet" href="https://js.arcgis.com/4.29/esri/themes/light/main.css">
+  <script src="https://js.arcgis.com/4.29/"></script>
+
+  <!-- Google Charts Gauge -->
+  <script src="https://www.gstatic.com/charts/loader.js"></script>
+</head>
+<body>
+
+<!-- <h3>Current pH — site: archery</h3> -->
+<div id="chart_div" style="width: 360px; height: 200px;"></div>
+
+<!-- <div class="info">
+  <div>Field: <span id="fieldName">mean</span></div>
+  <div>pH value: <span id="valueText">—</span></div>
+  <div>Status: <span id="statusBadge" class="badge gray">—</span></div>
+  <div id="status">Querying…</div>
+</div> -->
+
+<script>
+  // ----- CONFIG -----
+  const layerUrl = "https://services1.arcgis.com/JtAbKsJUQ7gSxKut/arcgis/rest/services/FortCollins_CurrentView/FeatureServer/0";
+  const SITE_VALUE = "archery";
+  const PARAM_VALUE = "pH";
+
+  // Replace with your numeric pH field name
+  const valueField = "mean";
+
+  // Gauge domain and compliance thresholds
+  const minVal = 0.0;   // full gauge lower bound
+  const maxVal = 10.0;  // full gauge upper bound
+  const lowRedMax   = 7.0; // red low band end
+  const greenMin    = 7.0;
+  const greenMax    = 9.0;
+  const highBandMin = 9.0; // visual band for high side (yellow, due to lib limits)
+
+  // Compliance classification per your spec
+  function classifyPH(pH) {
+    if (pH < 7.0 || pH > 9.0) return { label: "Out of compliance", cls: "red" };
+    if (pH >= 7.0 && pH <= 9.0) return { label: "Within acceptable range", cls: "green" };
+    return { label: "Near threshold", cls: "gray" }; // 6.5–7.0 or 9.0–9.5
+  }
+
+  // Draw Google Gauge
+  function drawGauge(pH) {
+    google.charts.load('current', { packages: ['gauge'] });
+    google.charts.setOnLoadCallback(function () {
+      const data = google.visualization.arrayToDataTable([
+        ['Label', 'Value'],
+        ['pH', pH]
+      ]);
+
+      // Band limitations: one red and one yellow only
+      const options = {
+        width: 360, height: 200,
+        min: minVal, max: maxVal,
+        redFrom: minVal, redTo: lowRedMax,        // red for pH < 7.0
+        greenFrom: greenMin, greenTo: greenMax,   // green for 7
+        yellowFrom: highBandMin, yellowTo: maxVal // yellow band on high side (we'll still mark status red if > 9.0)
+        // minorTicks: 5 // optional
+      };
+
+      const chart = new google.visualization.Gauge(document.getElementById('chart_div'));
+      chart.draw(data, options);
+
+      // Update textual UI
+      const { label, cls } = classifyPH(pH);
+      const badge = document.getElementById("statusBadge");
+      badge.textContent = label;
+      badge.className = `badge ${cls}`;
+
+      document.getElementById("valueText").textContent = pH.toFixed(2);
+      document.getElementById("fieldName").textContent = valueField;
+      document.getElementById("status").textContent = "OK";
+    });
+  }
+
+  // ArcGIS query: site='archery' AND parameter='pH'
+  require(["esri/layers/FeatureLayer"], function (FeatureLayer) {
+    const layer = new FeatureLayer({ url: layerUrl });
+
+    async function run() {
+      try {
+        const q = layer.createQuery();
+        q.where = `site = '${SITE_VALUE}' AND parameter = '${PARAM_VALUE}'`;
+        q.outFields = ["site", "parameter", valueField];
+        q.returnGeometry = false;
+
+        const res = await layer.queryFeatures(q);
+
+        if (!res.features.length) {
+          document.getElementById("status").innerHTML =
+            `<span class="error">No rows matched site='${SITE_VALUE}' AND parameter='${PARAM_VALUE}'.</span>`;
+          return;
+        }
+
+        const attrs = res.features[0].attributes;
+        console.log("First match attrs:", attrs); // check field names in devtools
+        const pH = Number(attrs[valueField]);
+
+        if (isNaN(pH)) {
+          document.getElementById("status").innerHTML =
+            `<span class="error">Field '${valueField}' is missing or not numeric. Check field name.</span>`;
+          return;
+        }
+
+        drawGauge(pH);
+      } catch (err) {
+        console.error(err);
+        document.getElementById("status").innerHTML =
+          `<span class="error">Query error: ${err.message}</span>`;
+      }
+    }
+
+    run();
+    // Optional: auto-refresh every 3 minutes
+    // setInterval(run, 3 * 60 * 1000);
+  });
+</script>
+</body>
+</html>
+
